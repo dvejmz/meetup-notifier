@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+from datetime import datetime
 
 from meetup_client import MeetupClient
 from ses_client import SesClient
@@ -21,21 +22,27 @@ class App():
                 answers.extend(r['answers'])
         return answers
 
+    def composeEmail(self, groupName, eventStartDateTime, answers):
+        messageAnswers = '\n'.join(answers)
+        return f'RSVP answers for the {groupName} MeetUp event scheduled on {str(eventStartDateTime)}\n\n{messageAnswers}'
+
     def run(self, groupUrlname):
         upcomingEvent = self.meetupClient.getUpcomingEventForGroup(groupUrlname)
         if upcomingEvent is None:
             logger.info('No upcoming event found, exiting')
             return False
 
-        logger.info('Upcoming event found')
+        eventStartEpochSeconds = upcomingEvent['time'] / 1000
+        eventStartDateTime = datetime.fromtimestamp(eventStartEpochSeconds)
+        logger.info('Upcoming event found. Starting on ' + str(eventStartDateTime))
         rsvps = self.meetupClient.getRsvpsForMeetup(upcomingEvent['id'])
-        rsvps_with_answers = self.getAnswersfromRsvps(rsvps)
-        num_rsvps = len(rsvps)
-        num_rsvps_with_answers = len(rsvps_with_answers)
-        if (num_rsvps_with_answers):
-            logger.info(f'Total RSVPs: {num_rsvps}. RSVPs w/ Answers: {num_rsvps_with_answers}. Sending notification')
-            message = '\n'.join(rsvps_with_answers)
-            self.sesClient.send(message)
+        rsvpsWithAnswers = self.getAnswersfromRsvps(rsvps)
+        numRsvps = len(rsvps)
+        numRsvpsWithAnswers = len(rsvpsWithAnswers)
+        if (numRsvpsWithAnswers):
+            logger.info(f'Total RSVPs: {numRsvps}. RSVPs w/ Answers: {numRsvpsWithAnswers}. Sending notification')
+            body = self.composeEmail(groupUrlname, eventStartDateTime, rsvpsWithAnswers)
+            self.sesClient.send(f'RSVPs for {groupUrlname} event on {str(eventStartDateTime)}', body)
         else:
             logger.info('No RSVPs found, exiting')
             return False

@@ -6,7 +6,7 @@ class SesClient():
         self.fromAddress = fromAddress
         self.toAddresses = toAddresses
 
-    def send(self, message):
+    def send(self, subject, body):
         try:
             response = self.ses.send_email(
                 Source=self.fromAddress,
@@ -15,11 +15,11 @@ class SesClient():
                 },
                 Message={
                     'Subject': {
-                        'Data': 'RSVP Summary',
+                        'Data': subject,
                     },
                     'Body': {
                         'Text': {
-                            'Data': message,
+                            'Data': body,
                         }
                     },
                 }
