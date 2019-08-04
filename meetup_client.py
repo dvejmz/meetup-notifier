@@ -9,5 +9,7 @@ class MeetupClient():
         return rsvps.results
 
     def getUpcomingEventForGroup(self, groupUrlname):
-        events = self.client.GetEvents(group_urlname=groupUrlname, status='upcoming')
-        return events.results[0]
+        events = self.client.GetEvents(group_urlname=groupUrlname, status='upcoming').results
+        if not len(events):
+            return None
+        return events[0]

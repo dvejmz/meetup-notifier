@@ -24,6 +24,9 @@ class App():
         logger.info('Running')
 
         upcomingEvent = self.meetupClient.getUpcomingEventForGroup(groupUrlname)
+        if upcomingEvent is None:
+            logger.info('No upcoming event found, exiting')
+            return False
 
         rsvps = self.meetupClient.getRsvpsForMeetup(upcomingEvent['id'])
         rsvps_with_answers = self.getAnswersfromRsvps(rsvps)

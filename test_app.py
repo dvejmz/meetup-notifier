@@ -56,7 +56,7 @@ class Test(unittest.TestCase):
         )
 
         app = App(sesClient, meetupClient)
-        appOutput = app.run(GROUP_URLNAME)
+        app.run(GROUP_URLNAME)
         sesClient.send.assert_called_with('I have a disability\nI have another disability')
 
     def test_it_does_not_send_email_when_there_are_no_rsvp_answers(self):
@@ -67,10 +67,10 @@ class Test(unittest.TestCase):
         )
 
         app = App(sesClient, meetupClient)
-        appOutput = app.run(GROUP_URLNAME)
+        app.run(GROUP_URLNAME)
         sesClient.send.assert_not_called()
 
-    def test_it_fetches_the_upcoming_event(self):
+    def test_it_gets_rsvps_for_upcoming_event(self):
         sesClient = getSesClientMock()
         meetupClient = getMeetupClientMock(
             rsvps=getFixtureRsvps(),
@@ -78,7 +78,15 @@ class Test(unittest.TestCase):
         )
 
         app = App(sesClient, meetupClient)
-        appOutput = app.run(GROUP_URLNAME)
+        app.run(GROUP_URLNAME)
+        meetupClient.getRsvpsForMeetup.assert_called_with(getFixtureEvent()['id'])
 
     def test_it_exits_if_it_cannot_find_upcoming_event(self):
-        pass
+        sesClient = getSesClientMock()
+        meetupClient = getMeetupClientMock(
+            rsvps=getFixtureRsvps(),
+            event=None,
+        )
+
+        app = App(sesClient, meetupClient)
+        self.assertFalse(app.run(GROUP_URLNAME))
