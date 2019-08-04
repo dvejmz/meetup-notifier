@@ -22,13 +22,12 @@ class App():
         return answers
 
     def run(self, groupUrlname):
-        logger.info('Running')
-
         upcomingEvent = self.meetupClient.getUpcomingEventForGroup(groupUrlname)
         if upcomingEvent is None:
             logger.info('No upcoming event found, exiting')
             return False
 
+        logger.info('Upcoming event found')
         rsvps = self.meetupClient.getRsvpsForMeetup(upcomingEvent['id'])
         rsvps_with_answers = self.getAnswersfromRsvps(rsvps)
         num_rsvps = len(rsvps)
@@ -38,7 +37,8 @@ class App():
             message = '\n'.join(rsvps_with_answers)
             self.sesClient.send(message)
         else:
-            logger.info('No RSVPs found')
+            logger.info('No RSVPs found, exiting')
+            return False
         
         logger.info('Done')
         return True
@@ -49,14 +49,18 @@ def start():
         raise Exception('API key not provided')
     meetupClient = MeetupClient(apiKey)
     fromAddress = os.environ.get('SENDER')
+    if not len(fromAddress):
+        raise Exception('No sender email provided')
     toAddressesCsv = os.environ.get('RECIPIENTS')
+    if not len(toAddressesCsv):
+        raise Exception('No CSV list of recipients was provided')
     toAddresses = toAddressesCsv.split(',')
     sesClient = SesClient(fromAddress, toAddresses)
     groupUrlname = os.environ.get('GROUP_URLNAME')
-    if len(groupUrlname) == 0:
+    if not len(groupUrlname):
         raise Exception('No group urlname provided')
     app = App(sesClient, meetupClient)
-    app.run(groupUrlname)
+    return app.run(groupUrlname)
 
 if __name__ == "__main__":
     start()

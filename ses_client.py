@@ -7,19 +7,22 @@ class SesClient():
         self.toAddresses = toAddresses
 
     def send(self, message):
-        response = self.ses.send_email(
-            Source=self.fromAddress,
-            Destination={
-                'ToAddresses': self.toAddresses,
-            },
-            Message={
-                'Subject': {
-                    'Data': 'RSVP Summary',
+        try:
+            response = self.ses.send_email(
+                Source=self.fromAddress,
+                Destination={
+                    'ToAddresses': self.toAddresses,
                 },
-                'Body': {
-                    'Text': {
-                        'Data': message,
-                    }
-                },
-            }
-        )
+                Message={
+                    'Subject': {
+                        'Data': 'RSVP Summary',
+                    },
+                    'Body': {
+                        'Text': {
+                            'Data': message,
+                        }
+                    },
+                }
+            )
+        except Exception as e:
+            raise Exception('Failed to send SES email: ' + str(e))
