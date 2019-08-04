@@ -49,7 +49,10 @@ if __name__ == "__main__":
     if not apiKey:
         raise Exception('API key not provided')
     meetupClient = MeetupClient(apiKey)
-    sesClient = SesClient()
+    fromAddress = os.environ.get('SENDER')
+    toAddressesCsv = os.environ.get('RECIPIENTS')
+    toAddresses = toAddressesCsv.split(',')
+    sesClient = SesClient(fromAddress, toAddresses)
     groupUrlname = os.environ.get('GROUP_URLNAME')
     if len(groupUrlname) == 0:
         raise Exception('No group urlname provided')
