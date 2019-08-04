@@ -1,11 +1,12 @@
 import logging
 import os
+import sys
 
 from meetup_client import MeetupClient
 from ses_client import SesClient
 
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 class App():
     def __init__(self, sesClient, meetupClient):
@@ -30,8 +31,10 @@ class App():
 
         rsvps = self.meetupClient.getRsvpsForMeetup(upcomingEvent['id'])
         rsvps_with_answers = self.getAnswersfromRsvps(rsvps)
-        if (len(rsvps_with_answers)):
-            logger.info('RSVPs were found, sending notification')
+        num_rsvps = len(rsvps)
+        num_rsvps_with_answers = len(rsvps_with_answers)
+        if (num_rsvps_with_answers):
+            logger.info(f'Total RSVPs: {num_rsvps}. RSVPs w/ Answers: {num_rsvps_with_answers}. Sending notification')
             message = '\n'.join(rsvps_with_answers)
             print(message)
             self.sesClient.send(message)
