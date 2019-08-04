@@ -18,15 +18,32 @@ def getSesClientMock():
     mock.send.return_value = True
     return mock
 
+def getFixtureEvent():
+    return {
+        'id': 'i43widfjdsf',
+        'description': 'This is a test event',
+    }
+
+def getFixtureRsvps(with_answers=True):
+    if with_answers:
+        return [
+            {'answers': ['I have a disability']},
+            {'answers': []},
+            {'answers': ['I have another disability']},
+        ]
+    else:
+        return [
+            {'answers': []},
+            {'answers': []},
+            {'answers': []},
+        ]
+
 class Test(unittest.TestCase):
     def test_it_exits_successfully(self):
         sesClient = getSesClientMock()
         meetupClient = getMeetupClientMock(
             rsvps=MagicMock(results=[]),
-            event={
-                'id': 'i43widfjdsf',
-                'description': 'This is a test event'
-            },
+            event=getFixtureEvent(),
         )
         app = App(sesClient, meetupClient)
         self.assertTrue(app.run(GROUP_URLNAME))
@@ -34,17 +51,8 @@ class Test(unittest.TestCase):
     def test_it_sends_email_when_there_are_rsvps_answers(self):
         sesClient = getSesClientMock()
         meetupClient = getMeetupClientMock(
-            rsvps=MagicMock(results=
-                [
-                    {'answers': ['I have a disability']},
-                    {'answers': []},
-                    {'answers': ['I have another disability']},
-                ]
-            ),
-            event={
-                'id': 'i43widfjdsf',
-                'description': 'This is a test event'
-            },
+            rsvps=getFixtureRsvps(),
+            event=getFixtureEvent(),
         )
 
         app = App(sesClient, meetupClient)
@@ -54,17 +62,8 @@ class Test(unittest.TestCase):
     def test_it_does_not_send_email_when_there_are_no_rsvp_answers(self):
         sesClient = getSesClientMock()
         meetupClient = getMeetupClientMock(
-            rsvps=MagicMock(results=
-                [
-                    {'answers': []},
-                    {'answers': []},
-                    {'answers': []},
-                ]
-            ),
-            event={
-                'id': 'i43widfjdsf',
-                'description': 'This is a test event'
-            },
+            rsvps=getFixtureRsvps(False),
+            event=getFixtureEvent(),
         )
 
         app = App(sesClient, meetupClient)
@@ -74,17 +73,8 @@ class Test(unittest.TestCase):
     def test_it_fetches_the_upcoming_event(self):
         sesClient = getSesClientMock()
         meetupClient = getMeetupClientMock(
-            rsvps=MagicMock(results=
-                [
-                    {'answers': []},
-                    {'answers': []},
-                    {'answers': []},
-                ]
-            ),
-            event={
-                'id': 'i43widfjdsf',
-                'description': 'This is a test event'
-            },
+            rsvps=getFixtureRsvps(),
+            event=getFixtureEvent(),
         )
 
         app = App(sesClient, meetupClient)

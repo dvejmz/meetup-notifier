@@ -25,8 +25,7 @@ class App():
 
         upcomingEvent = self.meetupClient.getUpcomingEventForGroup(groupUrlname)
 
-        response = self.meetupClient.getRsvpsForMeetup(upcomingEvent['id'])
-        rsvps = response.results
+        rsvps = self.meetupClient.getRsvpsForMeetup(upcomingEvent['id'])
         rsvps_with_answers = self.getAnswersfromRsvps(rsvps)
         if (len(rsvps_with_answers)):
             logger.info('RSVPs were found, sending notification')
