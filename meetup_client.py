@@ -7,3 +7,7 @@ class MeetupClient():
     def getRsvpsForMeetup(self, eventId):
         rsvps = self.client.GetRsvps(event_id=eventId)
         return rsvps
+
+    def getUpcomingEventForGroup(self, groupUrlname):
+        events = self.client.GetEvents(group_urlname=groupUrlname, status='upcoming')
+        return events.results[0]

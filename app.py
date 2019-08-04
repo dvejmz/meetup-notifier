@@ -20,9 +20,12 @@ class App():
                 answers.extend(r['answers'])
         return answers
 
-    def run(self):
+    def run(self, groupUrlname):
         logger.info('Running')
-        response = self.meetupClient.getRsvpsForMeetup('jgtwfryzlbtb')
+
+        upcomingEvent = self.meetupClient.getUpcomingEventForGroup(groupUrlname)
+
+        response = self.meetupClient.getRsvpsForMeetup(upcomingEvent['id'])
         rsvps = response.results
         rsvps_with_answers = self.getAnswersfromRsvps(rsvps)
         if (len(rsvps_with_answers)):
@@ -42,5 +45,8 @@ if __name__ == "__main__":
         raise Exception('API key not provided')
     meetupClient = MeetupClient(apiKey)
     sesClient = SesClient()
+    groupUrlname = os.environ.get('GROUP_URLNAME')
+    if len(groupUrlname) == 0:
+        raise Exception('No group urlname provided')
     app = App(sesClient, meetupClient)
-    app.run()
+    app.run(groupUrlname)

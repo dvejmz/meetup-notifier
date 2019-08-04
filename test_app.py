@@ -5,9 +5,12 @@ from ses_client import SesClient
 from meetup_client import MeetupClient
 from app import App
 
-def getMeetupClientMock(rsvps={}):
+GROUP_URLNAME = 'Group-Urlname'
+
+def getMeetupClientMock(rsvps={}, event={}):
     mock = MagicMock(wraps=MeetupClient)
     mock.getRsvpsForMeetup.return_value = rsvps
+    mock.getUpcomingEventForGroup.return_value = event
     return mock
 
 def getSesClientMock():
@@ -19,10 +22,14 @@ class Test(unittest.TestCase):
     def test_it_exits_successfully(self):
         sesClient = getSesClientMock()
         meetupClient = getMeetupClientMock(
-            rsvps=MagicMock(results=[])
+            rsvps=MagicMock(results=[]),
+            event={
+                'id': 'i43widfjdsf',
+                'description': 'This is a test event'
+            },
         )
         app = App(sesClient, meetupClient)
-        self.assertTrue(app.run())
+        self.assertTrue(app.run(GROUP_URLNAME))
 
     def test_it_sends_email_when_there_are_rsvps_answers(self):
         sesClient = getSesClientMock()
@@ -33,12 +40,16 @@ class Test(unittest.TestCase):
                     {'answers': []},
                     {'answers': ['I have another disability']},
                 ]
-            ))
+            ),
+            event={
+                'id': 'i43widfjdsf',
+                'description': 'This is a test event'
+            },
+        )
 
         app = App(sesClient, meetupClient)
-        appOutput = app.run()
+        appOutput = app.run(GROUP_URLNAME)
         sesClient.send.assert_called_with('I have a disability\nI have another disability')
-        self.assertTrue(appOutput)
 
     def test_it_does_not_send_email_when_there_are_no_rsvp_answers(self):
         sesClient = getSesClientMock()
@@ -49,9 +60,35 @@ class Test(unittest.TestCase):
                     {'answers': []},
                     {'answers': []},
                 ]
-            ))
+            ),
+            event={
+                'id': 'i43widfjdsf',
+                'description': 'This is a test event'
+            },
+        )
 
         app = App(sesClient, meetupClient)
-        appOutput = app.run()
+        appOutput = app.run(GROUP_URLNAME)
         sesClient.send.assert_not_called()
-        self.assertTrue(appOutput)
+
+    def test_it_fetches_the_upcoming_event(self):
+        sesClient = getSesClientMock()
+        meetupClient = getMeetupClientMock(
+            rsvps=MagicMock(results=
+                [
+                    {'answers': []},
+                    {'answers': []},
+                    {'answers': []},
+                ]
+            ),
+            event={
+                'id': 'i43widfjdsf',
+                'description': 'This is a test event'
+            },
+        )
+
+        app = App(sesClient, meetupClient)
+        appOutput = app.run(GROUP_URLNAME)
+
+    def test_it_exits_if_it_cannot_find_upcoming_event(self):
+        pass
