@@ -36,7 +36,6 @@ class App():
         if (num_rsvps_with_answers):
             logger.info(f'Total RSVPs: {num_rsvps}. RSVPs w/ Answers: {num_rsvps_with_answers}. Sending notification')
             message = '\n'.join(rsvps_with_answers)
-            print(message)
             self.sesClient.send(message)
         else:
             logger.info('No RSVPs found')
@@ -44,7 +43,7 @@ class App():
         logger.info('Done')
         return True
 
-if __name__ == "__main__":
+def start():
     apiKey = os.environ.get('API_KEY')
     if not apiKey:
         raise Exception('API key not provided')
@@ -58,3 +57,6 @@ if __name__ == "__main__":
         raise Exception('No group urlname provided')
     app = App(sesClient, meetupClient)
     app.run(groupUrlname)
+
+if __name__ == "__main__":
+    start()

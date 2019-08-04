@@ -23,4 +23,3 @@ class SesClient():
                 },
             }
         )
-        print(response)
