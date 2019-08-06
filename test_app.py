@@ -22,6 +22,7 @@ def getFixtureEvent():
     return {
         'id': 'i43widfjdsf',
         'description': 'This is a test event',
+        'time': 1565130767000,
     }
 
 def getFixtureRsvps(with_answers=True):
@@ -39,14 +40,14 @@ def getFixtureRsvps(with_answers=True):
         ]
 
 class Test(unittest.TestCase):
-    def test_it_exits_successfully(self):
+    def test_it_exits_with_fail_return_code_if_no_notifications_sent(self):
         sesClient = getSesClientMock()
         meetupClient = getMeetupClientMock(
             rsvps=MagicMock(results=[]),
             event=getFixtureEvent(),
         )
         app = App(sesClient, meetupClient)
-        self.assertTrue(app.run(GROUP_URLNAME))
+        self.assertFalse(app.run(GROUP_URLNAME))
 
     def test_it_sends_email_when_there_are_rsvps_answers(self):
         sesClient = getSesClientMock()
@@ -57,7 +58,7 @@ class Test(unittest.TestCase):
 
         app = App(sesClient, meetupClient)
         app.run(GROUP_URLNAME)
-        sesClient.send.assert_called_with('I have a disability\nI have another disability')
+        sesClient.send.assert_called_with('RSVPs for Group-Urlname event on 2019-08-06 23:32:47', 'RSVP answers for the Group-Urlname MeetUp event scheduled on 2019-08-06 23:32:47\n\nI have a disability\nI have another disability')
 
     def test_it_does_not_send_email_when_there_are_no_rsvp_answers(self):
         sesClient = getSesClientMock()

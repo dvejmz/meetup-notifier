@@ -5,6 +5,7 @@ from datetime import datetime
 
 from meetup_client import MeetupClient
 from ses_client import SesClient
+import rsvps as Rsvps
 
 logger = logging.getLogger()
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -13,14 +14,6 @@ class App():
     def __init__(self, sesClient, meetupClient):
         self.sesClient = sesClient
         self.meetupClient = meetupClient
-
-    def getAnswersfromRsvps(self, rsvps):
-        answers = []
-        for r in rsvps:
-            rsvp_answers = list(filter(lambda a: len(a), r['answers']))
-            if len(rsvp_answers):
-                answers.extend(r['answers'])
-        return answers
 
     def composeEmail(self, groupName, eventStartDateTime, answers):
         messageAnswers = '\n'.join(answers)
@@ -36,7 +29,7 @@ class App():
         eventStartDateTime = datetime.fromtimestamp(eventStartEpochSeconds)
         logger.info('Upcoming event found. Starting on ' + str(eventStartDateTime))
         rsvps = self.meetupClient.getRsvpsForMeetup(upcomingEvent['id'])
-        rsvpsWithAnswers = self.getAnswersfromRsvps(rsvps)
+        rsvpsWithAnswers = Rsvps.getAnswersfromRsvps(rsvps)
         numRsvps = len(rsvps)
         numRsvpsWithAnswers = len(rsvpsWithAnswers)
         if (numRsvpsWithAnswers):
