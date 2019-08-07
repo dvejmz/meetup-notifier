@@ -11,6 +11,7 @@ class Test(unittest.TestCase):
         ]
         expected = ['I have a requirement', 'I have another requirement']
         result = rsvps.getAnswersfromRsvps(fixtures)
+        self.assertListEqual(expected, result)
 
     def test_it_returns_empty_list_if_no_answers(self):
         fixtures = [

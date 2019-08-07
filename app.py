@@ -6,6 +6,7 @@ from datetime import datetime
 from meetup_client import MeetupClient
 from ses_client import SesClient
 import rsvps as Rsvps
+import email_compose
 
 logger = logging.getLogger()
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -14,10 +15,6 @@ class App():
     def __init__(self, sesClient, meetupClient):
         self.sesClient = sesClient
         self.meetupClient = meetupClient
-
-    def composeEmail(self, groupName, eventStartDateTime, answers):
-        messageAnswers = '\n'.join(answers)
-        return f'RSVP answers for the {groupName} MeetUp event scheduled on {str(eventStartDateTime)}\n\n{messageAnswers}'
 
     def run(self, groupUrlname):
         upcomingEvent = self.meetupClient.getUpcomingEventForGroup(groupUrlname)
@@ -34,7 +31,7 @@ class App():
         numRsvpsWithAnswers = len(rsvpsWithAnswers)
         if (numRsvpsWithAnswers):
             logger.info(f'Total RSVPs: {numRsvps}. RSVPs w/ Answers: {numRsvpsWithAnswers}. Sending notification')
-            body = self.composeEmail(groupUrlname, eventStartDateTime, rsvpsWithAnswers)
+            body = email_compose.composeEmail(groupUrlname, eventStartDateTime, rsvpsWithAnswers)
             self.sesClient.send(f'RSVPs for {groupUrlname} event on {str(eventStartDateTime)}', body)
         else:
             logger.info('No RSVPs found, exiting')
