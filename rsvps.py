@@ -5,4 +5,3 @@ def getAnswersfromRsvps(rsvps):
         if len(rsvp_answers):
             answers.extend(r['answers'])
     return answers
-

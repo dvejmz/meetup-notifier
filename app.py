@@ -6,32 +6,39 @@ from datetime import datetime
 from meetup_client import MeetupClient
 from ses_client import SesClient
 import rsvps as Rsvps
-import email_compose
+import event as Event
+import email_compose as EmailCompose
 
 logger = logging.getLogger()
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 class App():
     def __init__(self, sesClient, meetupClient):
         self.sesClient = sesClient
         self.meetupClient = meetupClient
 
-    def run(self, groupUrlname):
+    def run(self, groupUrlname, hoursBeforeEventToNotify):
         upcomingEvent = self.meetupClient.getUpcomingEventForGroup(groupUrlname)
         if upcomingEvent is None:
             logger.info('No upcoming event found, exiting')
             return False
 
-        eventStartEpochSeconds = upcomingEvent['time'] / 1000
-        eventStartDateTime = datetime.fromtimestamp(eventStartEpochSeconds)
-        logger.info('Upcoming event found. Starting on ' + str(eventStartDateTime))
+        eventStartSecondsFromNow = Event.getEventStartTimeFromDateInSeconds(upcomingEvent, datetime.now())
+        secondsBeforeEventToNotify = hoursBeforeEventToNotify * 3600
+        eventStartDateTime = Event.eventStartTimestampToDateTime(upcomingEvent)
+        logger.info('Event starting on ' + str(eventStartDateTime))
+        if eventStartSecondsFromNow > secondsBeforeEventToNotify:
+            eventStartHoursFromNow = eventStartSecondsFromNow / 3600
+            logger.info(f'Upcoming event too far into the future ({eventStartHoursFromNow}), exiting')
+            return False
+
         rsvps = self.meetupClient.getRsvpsForMeetup(upcomingEvent['id'])
         rsvpsWithAnswers = Rsvps.getAnswersfromRsvps(rsvps)
         numRsvps = len(rsvps)
         numRsvpsWithAnswers = len(rsvpsWithAnswers)
-        if (numRsvpsWithAnswers):
+        if numRsvpsWithAnswers:
             logger.info(f'Total RSVPs: {numRsvps}. RSVPs w/ Answers: {numRsvpsWithAnswers}. Sending notification')
-            body = email_compose.composeEmail(groupUrlname, eventStartDateTime, rsvpsWithAnswers)
+            body = EmailCompose.composeEmail(groupUrlname, eventStartDateTime, rsvpsWithAnswers)
             self.sesClient.send(f'RSVPs for {groupUrlname} event on {str(eventStartDateTime)}', body)
         else:
             logger.info('No RSVPs found, exiting')
@@ -56,8 +63,10 @@ def start():
     groupUrlname = os.environ.get('GROUP_URLNAME')
     if not len(groupUrlname):
         raise Exception('No group urlname provided')
+    hoursBeforeNotify = os.environ.get('HOURS_BEFORE_NOTIFY') or 48
+
     app = App(sesClient, meetupClient)
-    return app.run(groupUrlname)
+    return app.run(groupUrlname, hoursBeforeNotify)
 
 if __name__ == "__main__":
     start()
