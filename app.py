@@ -47,11 +47,10 @@ class App():
         logger.info('Done')
         return True
 
-def start():
+def getConfig():
     apiKey = os.environ.get('API_KEY')
     if not apiKey:
         raise Exception('API key not provided')
-    meetupClient = MeetupClient(apiKey)
     fromAddress = os.environ.get('SENDER')
     if not len(fromAddress):
         raise Exception('No sender email provided')
@@ -59,14 +58,24 @@ def start():
     if not len(toAddressesCsv):
         raise Exception('No CSV list of recipients was provided')
     toAddresses = toAddressesCsv.split(',')
-    sesClient = SesClient(fromAddress, toAddresses)
     groupUrlname = os.environ.get('GROUP_URLNAME')
     if not len(groupUrlname):
         raise Exception('No group urlname provided')
     hoursBeforeNotify = os.environ.get('HOURS_BEFORE_NOTIFY') or 48
 
+    return {
+        'apiKey': apiKey,
+        'sender': fromAddress,
+        'recipients': toAddresses,
+        'groupUrlname': groupUrlname,
+        'hoursBeforeNotify': hoursBeforeNotify,
+    }
+
+def start(config):
+    meetupClient = MeetupClient(config['apiKey'])
+    sesClient = SesClient(config['sender'], config['recipients'])
     app = App(sesClient, meetupClient)
-    return app.run(groupUrlname, hoursBeforeNotify)
+    return app.run(config['groupUrlname'], config['hoursBeforeNotify'])
 
 if __name__ == "__main__":
-    start()
+    start(getConfig())
