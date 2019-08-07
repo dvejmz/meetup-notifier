@@ -10,6 +10,6 @@ class Test(unittest.TestCase):
             {'answers': []},
             {'answers': ['I have another requirement']},
         ]
-        expected = 'RSVP answers for the Group-Urlname MeetUp event scheduled on 2019-08-06 23:32:47\n\nI have a requirement\nI have another requirement'
+        expected = 'RSVP answers for the Group-Urlname MeetUp event scheduled on 2019-08-06 23:32:47 (UTC)\n\nI have a requirement\nI have another requirement'
         result = email_compose.composeEmail('Group-Urlname', datetime.datetime.fromtimestamp(1565130767000/1000), ['I have a requirement', 'I have another requirement'])
         self.assertEqual(expected, result)

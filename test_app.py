@@ -64,7 +64,7 @@ class Test(unittest.TestCase):
         app = App(sesClient, meetupClient)
         app.run(GROUP_URLNAME, DEFAULT_NOTIFY_PERIOD_HOURS)
         expectedEventStartTime = datetime.datetime.fromtimestamp(getFixtureEvent()['time'] / 1000)
-        sesClient.send.assert_called_with(f'RSVPs for Group-Urlname event on {str(expectedEventStartTime)}', f'RSVP answers for the Group-Urlname MeetUp event scheduled on {str(expectedEventStartTime)}\n\nI have a disability\nI have another disability')
+        sesClient.send.assert_called_with(f'RSVPs for Group-Urlname event on {str(expectedEventStartTime)} (UTC)', f'RSVP answers for the Group-Urlname MeetUp event scheduled on {str(expectedEventStartTime)} (UTC)\n\nI have a disability\nI have another disability')
 
     def test_it_does_not_send_email_when_there_are_no_rsvp_answers(self):
         sesClient = getSesClientMock()

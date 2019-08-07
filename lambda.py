@@ -1,4 +1,4 @@
 import app
 
 def handle(event, context):
-    return app.start()
+    return app.start(app.getConfig())

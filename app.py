@@ -39,7 +39,7 @@ class App():
         if numRsvpsWithAnswers:
             logger.info(f'Total RSVPs: {numRsvps}. RSVPs w/ Answers: {numRsvpsWithAnswers}. Sending notification')
             body = EmailCompose.composeEmail(groupUrlname, eventStartDateTime, rsvpsWithAnswers)
-            self.sesClient.send(f'RSVPs for {groupUrlname} event on {str(eventStartDateTime)}', body)
+            self.sesClient.send(f'RSVPs for {groupUrlname} event on {str(eventStartDateTime)} (UTC)', body)
         else:
             logger.info('No RSVPs found, exiting')
             return False
@@ -68,7 +68,7 @@ def getConfig():
         'sender': fromAddress,
         'recipients': toAddresses,
         'groupUrlname': groupUrlname,
-        'hoursBeforeNotify': hoursBeforeNotify,
+        'hoursBeforeNotify': int(hoursBeforeNotify),
     }
 
 def start(config):
