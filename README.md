@@ -1,4 +1,10 @@
-# MeetUp Notifier
+# MeetUp Notifier (DISCONTINUED)
+
+## NOTICE
+
+Due to changes in the authorisation mechanism for the Meetup API, this app will no longer be able to work and will thus be discontinued.
+
+## Overview
 
 This little application (designed to run as an AWS Lambda) will send notifications based on information retrieved via the [MeetUp API](https://www.meetup.com/meetup_api/)
 
